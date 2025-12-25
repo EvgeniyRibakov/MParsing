@@ -2,13 +2,14 @@
 import sys
 from pathlib import Path
 
-# Добавляем src в путь
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+# Добавляем корневую директорию проекта в путь
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
 from loguru import logger
-from config.settings import Settings
-from utils.logger import setup_logger
-from api.ozon_api import OzonAPI
+from src.config.settings import Settings
+from src.utils.logger import setup_logger
+from src.api.ozon_api import OzonAPI
 import openpyxl
 from openpyxl import load_workbook
 

@@ -37,7 +37,6 @@ def setup_logger(logs_dir: Path, debug: bool = False) -> None:
         format=log_format,
         level=level,
         colorize=True,
-        encoding="utf-8",
     )
     
     # Логирование в файл (все логи)

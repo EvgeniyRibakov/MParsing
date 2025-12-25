@@ -1,9 +1,15 @@
 """Утилита для чтения артикулов из Articles.xlsx."""
+import sys
 from pathlib import Path
 from typing import List, Dict, Optional
 from loguru import logger
 import openpyxl
 from openpyxl import load_workbook
+
+# Добавляем src в путь для корректных импортов (если нужно)
+src_path = Path(__file__).parent.parent
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
 
 def read_wb_articles(articles_file_path: Path) -> List[str]:
@@ -83,4 +89,5 @@ def find_articles_file() -> Optional[Path]:
     
     logger.warning("Файл Articles.xlsx не найден ни в одном из возможных мест")
     return None
+
 

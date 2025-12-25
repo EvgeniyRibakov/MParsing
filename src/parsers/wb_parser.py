@@ -2,8 +2,8 @@
 from typing import Dict, List, Optional
 from pathlib import Path
 from loguru import logger
-from api.wb_api import WildberriesAPI
-from utils.articles_reader import read_wb_articles, find_articles_file
+from src.api.wb_api import WildberriesAPI
+from src.utils.articles_reader import read_wb_articles, find_articles_file
 
 
 class WildberriesParser:

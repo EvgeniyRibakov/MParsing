@@ -21,12 +21,20 @@
 #### 2. ⭐ ОСНОВНОЙ ЭНДПОИНТ: Получение цен по артикулам (Discounts-Prices API)
 - **Base URL:** `https://discounts-prices-api.wildberries.ru`
 - **Endpoint:** `/api/v2/list/goods/filter` ⭐ **ЗАКРЕПЛЁН ДЛЯ MVP**
-- **Метод:** POST
-- **Описание:** Получение информации о товарах по артикулам, включая цены, валюту, общие скидки и скидки WB Клуба
-- **Параметры:**
-  - `vendorCodes`: Массив артикулов (до 100 за запрос)
+- **Метод:** GET (для одного артикула) или POST (для нескольких артикулов)
+- **Описание:** Получение информации о товарах, включая цены, валюту, общие скидки и скидки WB Клуба
+- **GET запрос (один артикул):**
+  - **Параметры query:**
+    - `vendorCode` (required, string): Артикул продавца (Seller's article)
+    - `limit` (optional): Количество товаров (макс 1000) - для получения всех товаров без указания артикула
+    - `offset` (optional): Смещение для пагинации
+  - **Лимит:** 10 запросов за 6 секунд, интервал 600 мс
+- **POST запрос (несколько артикулов):**
+  - **Параметры body:**
+    - `nmIDs`: Массив артикулов Wildberries (до 100 за запрос)
 - **Авторизация:** API ключ в заголовке `Authorization`
 - **ИСТОЧНИК АРТИКУЛОВ:** Артикулы всех товаров WB берутся из файла `Articles.xlsx`
+- **Документация:** https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki/paths/~1api~1v2~1list~1goods~1filter/get
 
 #### 3. Получение цен по nm_id (Discounts-Prices API)
 - **Base URL:** `https://discounts-prices-api.wildberries.ru`

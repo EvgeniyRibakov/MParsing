@@ -1,9 +1,15 @@
 """Точка входа в приложение."""
 import sys
+from pathlib import Path
+
+# Добавляем корневую директорию проекта в путь
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from loguru import logger
-from config.settings import Settings
-from utils.logger import setup_logger
-from parsers.wb_parser import WildberriesParser
+from src.config.settings import Settings
+from src.utils.logger import setup_logger
+from src.parsers.wb_parser import WildberriesParser
 
 
 def main() -> int:
@@ -71,8 +77,31 @@ def main() -> int:
         logger.success(f"Обработка завершена. Всего товаров: {len(all_results)}")
         logger.info("=" * 60)
         
-        # TODO: Экспорт результатов
-        logger.info("Экспорт результатов ещё не реализован")
+        # Экспорт результатов
+        if all_results:
+            try:
+                import pandas as pd
+                from datetime import datetime
+                
+                # Создаём DataFrame
+                df = pd.DataFrame(all_results)
+                
+                # Формируем имя файла с датой и временем
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                output_file = settings.output_dir / f"wb_prices_{timestamp}.xlsx"
+                
+                # Сохраняем в Excel
+                df.to_excel(output_file, index=False, engine='openpyxl')
+                
+                logger.success(f"✅ Результаты сохранены в: {output_file}")
+                logger.info(f"📊 Всего строк: {len(df)}")
+                logger.info(f"📋 Колонки: {', '.join(df.columns.tolist())}")
+                
+            except Exception as e:
+                logger.error(f"Ошибка при экспорте результатов: {e}")
+                logger.exception("Детали ошибки:")
+        else:
+            logger.warning("Нет данных для экспорта")
         
         return 0
         
