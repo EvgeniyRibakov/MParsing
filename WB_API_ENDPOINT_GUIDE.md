@@ -159,3 +159,7 @@ prices = api.get_prices_by_articles(articles)
 4. **Лимиты API строгие** - при превышении возможна временная блокировка
 
 
+
+
+
+

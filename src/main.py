@@ -86,16 +86,37 @@ def main() -> int:
                 # Создаём DataFrame
                 df = pd.DataFrame(all_results)
                 
+                # Сортируем по кабинету и артикулу для удобства
+                if 'cabinet' in df.columns and 'vendor_code' in df.columns:
+                    df = df.sort_values(['cabinet', 'vendor_code', 'size_name'], ascending=[True, True, True])
+                
                 # Формируем имя файла с датой и временем
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 output_file = settings.output_dir / f"wb_prices_{timestamp}.xlsx"
                 
-                # Сохраняем в Excel
-                df.to_excel(output_file, index=False, engine='openpyxl')
+                # Сохраняем в Excel с форматированием
+                with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+                    df.to_excel(writer, index=False, sheet_name='Prices')
+                    
+                    # Получаем worksheet для форматирования
+                    worksheet = writer.sheets['Prices']
+                    
+                    # Автоматически подгоняем ширину колонок
+                    for idx, col in enumerate(df.columns, 1):
+                        max_length = max(
+                            df[col].astype(str).map(len).max(),
+                            len(str(col))
+                        )
+                        worksheet.column_dimensions[chr(64 + idx)].width = min(max_length + 2, 50)
                 
                 logger.success(f"✅ Результаты сохранены в: {output_file}")
                 logger.info(f"📊 Всего строк: {len(df)}")
                 logger.info(f"📋 Колонки: {', '.join(df.columns.tolist())}")
+                
+                # Статистика по заполненности
+                if 'base_price' in df.columns:
+                    filled = df['base_price'].notna().sum()
+                    logger.info(f"💰 Заполнено цен: {filled} из {len(df)} ({filled/len(df)*100:.1f}%)")
                 
             except Exception as e:
                 logger.error(f"Ошибка при экспорте результатов: {e}")

@@ -82,40 +82,57 @@ class WildberriesParser:
             # Обрабатываем полученные данные о ценах
             for price_item in prices_data:
                 vendor_code = price_item.get("vendorCode") or price_item.get("vendor_code")
+                nm_id = price_item.get("nmID") or price_item.get("nmId")
                 
-                # Извлекаем цены из ответа API
-                # Структура ответа будет уточнена после тестирования
-                # Пробуем разные возможные поля
-                base_price = (
-                    price_item.get("price") or 
-                    price_item.get("basicPrice") or 
-                    price_item.get("basic_price") or
-                    price_item.get("priceU")  # Возможное поле WB API
-                )
+                # Структура API: данные о ценах находятся в массиве sizes
+                # Каждый товар может иметь несколько размеров
+                sizes = price_item.get("sizes", [])
                 
-                discount_price = (
-                    price_item.get("discountPrice") or 
-                    price_item.get("discount_price") or
-                    price_item.get("salePrice") or
-                    price_item.get("sale_price")
-                )
-                
-                price_with_card = (
-                    price_item.get("priceWithCard") or 
-                    price_item.get("price_with_card") or
-                    price_item.get("wbCardPrice") or
-                    price_item.get("wb_card_price")
-                )
-                
-                all_results.append({
-                    "cabinet": self.cabinet_name,
-                    "cabinet_id": self.cabinet_id,
-                    "vendor_code": vendor_code,
-                    "base_price": base_price,
-                    "discount_price": discount_price,
-                    "price_with_card": price_with_card,
-                    "raw_price_data": price_item,  # Сохраняем сырые данные для отладки
-                })
+                if sizes:
+                    # Обрабатываем каждый размер отдельно
+                    for size in sizes:
+                        base_price = size.get("price")  # Базовая цена
+                        discounted_price = size.get("discountedPrice")  # Цена со скидкой
+                        club_discounted_price = size.get("clubDiscountedPrice")  # Цена с WB Клубом
+                        size_id = size.get("sizeID")
+                        tech_size_name = size.get("techSizeName", "")
+                        
+                        all_results.append({
+                            "cabinet": self.cabinet_name,
+                            "cabinet_id": self.cabinet_id,
+                            "nm_id": nm_id,
+                            "vendor_code": vendor_code,
+                            "size_id": size_id,
+                            "size_name": tech_size_name,
+                            "base_price": base_price,
+                            "discounted_price": discounted_price,
+                            "club_discounted_price": club_discounted_price,
+                            "discount_percent": price_item.get("discount"),
+                            "club_discount_percent": price_item.get("clubDiscount"),
+                            "currency": price_item.get("currencyIsoCode4217", "RUB"),
+                            "editable_size_price": price_item.get("editableSizePrice", False),
+                        })
+                else:
+                    # Если нет sizes, пробуем извлечь цены напрямую из товара
+                    base_price = price_item.get("price")
+                    discounted_price = price_item.get("discountedPrice")
+                    club_discounted_price = price_item.get("clubDiscountedPrice")
+                    
+                    all_results.append({
+                        "cabinet": self.cabinet_name,
+                        "cabinet_id": self.cabinet_id,
+                        "nm_id": nm_id,
+                        "vendor_code": vendor_code,
+                        "size_id": None,
+                        "size_name": None,
+                        "base_price": base_price,
+                        "discounted_price": discounted_price,
+                        "club_discounted_price": club_discounted_price,
+                        "discount_percent": price_item.get("discount"),
+                        "club_discount_percent": price_item.get("clubDiscount"),
+                        "currency": price_item.get("currencyIsoCode4217", "RUB"),
+                        "editable_size_price": price_item.get("editableSizePrice", False),
+                    })
         
         logger.success(f"Обработано товаров: {len(all_results)}")
         return all_results
